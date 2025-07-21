@@ -8,14 +8,9 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 
-function generateRandomString(length, characters = "abcdefghijklmnopqrstuvwxyz0123456789") {
-  let result = "";
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
+const generateRandomString = () => {
+  return Math.random().toString(36).substring(2,8);
+  };
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
@@ -47,7 +42,23 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+
+  if (longURL) {
+    res.redirect(longURL);
+      } else {
+        res.status(404).send("Short URL not found");
+      }
+});
+
 app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
   console.log(req.body); // log the POST request body to the console
   res.send("Ok"); // Respond with "Ok"
 });
